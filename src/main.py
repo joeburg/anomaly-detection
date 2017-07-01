@@ -22,6 +22,3 @@ flagged_file = sys.argv[3]
 
 anomaly_detection.AnomalyDetection(batch_file, stream_file, flagged_file).process()
 print 'Analyzed purchases in %.4f seconds.' %(time.time()-t0)
-
-# process the data stream
-# run the analysis 

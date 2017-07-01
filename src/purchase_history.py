@@ -1,4 +1,3 @@
-# from social_network import SocialNetwork
 
 class PurchaseHistory:
 	''' The purchase history stores the purchases for 
@@ -9,16 +8,10 @@ class PurchaseHistory:
 		# data structure for purchases: { id: [(timestamp, amount), ...], ...}
 		self.purchases = {}
 
-		# # purchases in a user's network 
-		# # data structure of purchases: 
-		# #     { id: { purchaseNumber: (timestamp, amount), ...}, ...}
-		# self.network_purchases = {}
-
 		# number of consecutive purchases to be considered 
 		self.T = int(T)
 
 
-	# def add_purchase(self, uid, timestamp, amount):
 	def add_purchase(self, purchase):
 		''' Adds a purcahse to a users history '''
 		timestamp = purchase.get('timestamp')
@@ -29,12 +22,8 @@ class PurchaseHistory:
 		if timestamp and uid and amount:
 			# ensure the user has a purchase history 
 			if uid in self.purchases:
-				# purchaseNumber = len(self.purchases[uid]) + 1
-				# self.purchases[uid][purchaseNumber] = (timestamp, amount)
 				self.purchases[uid].append((timestamp, float(amount)))
 			else:
-				# purchaseNumber = 0
-				# self.purchases[uid] = {purchaseNumber : (timestamp, amount)}
 				self.purchases[uid] = [(timestamp, float(amount))]
 
 		else:

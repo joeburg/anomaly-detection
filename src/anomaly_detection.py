@@ -5,9 +5,6 @@ import numpy as np
 # project 
 from purchase_history import PurchaseHistory
 from social_network import SocialNetwork
-# from utils import LoadJsonData, WriteJsonData
-
-''' Write analysis functions here. '''
 
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
@@ -25,25 +22,6 @@ class AnomalyDetection:
 		self.network = {}
 		self.purchases = {}
 
-		# # load the batch data and extract the network degree
-		# # and purchase number parameters 
-		# self.BatchData = LoadJsonData(batch_file)
-
-		# print self.BatchData
-
-		# # an input to the program over-rides the values in batch data
-		# if not D:
-		# 	D = self.BatchData[0]['D']
-
-		# if not T:
-		# 	T = self.BatchData[0]['T']
-
-		# # social network 
-		# self.network = SocialNetwork(D)
-
-		# # purchase history 
-		# self.purchases = PurchaseHistory(T)
-
 	def process(self):
 		''' method to load and process the data '''
 		# load the batch data
@@ -51,12 +29,6 @@ class AnomalyDetection:
 
 		# analyze the stream data
 		self.analyze_stream_data()
-
-		# # open the data files
-		# fbatch = open(self.batch_file)
-		# fstream = open(self.stream_file)
-		# fflagged = open(self.flagged_file, 'a')
-		# pass
 
 
 	def analyze_batch_data(self):
@@ -73,30 +45,10 @@ class AnomalyDetection:
 		f = self.process_events(f, 'batch')
 		f.close()
 
-		# while True:
-		# 	line = f.readline().strip()
-		# 	if line:
-		# 		event = json.loads(line)
-
-		# 		if event['event_type'] == 'purchase':
-		# 			self.purchases.add_purchase(event)
-
-		# 		elif event['event_type'] == 'befriend':
-		# 			self.network.add_friend(event)
-
-		# 		elif event['event_type'] == 'unfriend':
-		# 			self.network.remove_friend(event)
-		# 	else:
-		# 		break
-		# f.close()
-
 		# once all the users are loaded to the social 
 		# network, generate the Dth degree network 
 		self.network.build_network()
 
-		# print self.network.friends
-		# print self.purchases.purchases
-		# print self.network.network
 
 	def process_events(self, f, data_type):
 		''' Process events in a data stream. If the data

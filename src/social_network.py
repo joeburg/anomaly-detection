@@ -74,7 +74,6 @@ class SocialNetwork:
 			if id1 in self.friends:
 				# ensure the relationship exists before removing 
 				if self.are_friends(id1, id2):
-					# self.friends[id1] = self.friends[id1].remove(id2)
 					self.friends[id1].remove(id2)
 					friend_removed = True 
 
@@ -82,7 +81,6 @@ class SocialNetwork:
 			# relationship for id2 as well
 			if id2 in self.friends:
 				if self.are_friends(id2, id1):
-					# self.friends[id2] = self.friends[id2].remove(id1)
 					self.friends[id2].remove(id1)
 					friend_removed = True 
 
@@ -150,7 +148,6 @@ class SocialNetwork:
 							# note this includes the id1 itself in the network 
 							self.network[id1] = set(path) 
 
-
 	def bfs_paths(self, start, goal):
 		''' The Breath-First search algorithm to determine the 
 			distance between two nodes in the friends graph '''
@@ -171,7 +168,6 @@ class SocialNetwork:
 		except StopIteration:
 			return None	
 
-
 	def set_network_degree(self, D):
 		''' This method allows to reset the degree of the network 
 			without needing to rebuild the initial friends list '''
@@ -179,22 +175,6 @@ class SocialNetwork:
 
 		# update the network based on the set degree 
 		self.update_network()
-
-
-	# def add_to_network(self, id1, id2):
-	# 	''' This method adds '''
-	# 	# update the network after a friend has been added 
-
-
-	# def remove_from_network(self, id1, id2):
-	# 	''' This method removes id2's friends from id1's network;
-	# 		assuming id1 is not already friends with a given id in
-	# 		id2's friends set '''
-	# 	# update the network after a friend has been removed 
-
-	# 	# when removing id2's friends from id1's network, use
-	# 	# the difference from the intersection as the filter
-	# 	# friends to remove id1 network = id2 - (id1 intersection id2)
 
 	def get_user_list(self, uid):
 		''' Returns the list of users in the given user's 
