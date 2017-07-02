@@ -49,13 +49,14 @@ class AnomalyDetection:
 		# process each subsequent event in the batch data
 		f = self.process_events(f, 'batch')
 		f.close()
+
 		print 'Batch data loaded (%s users and %d purchases)...'\
 				% (self.network.get_number_users(),
 					self.purchases.get_number_purchases())
 
 		# once all the users are loaded to the social 
 		# network, generate the Dth degree network
-		print 'Updating the Dth degree social networks...' 
+		print 'Updating the D=%d degree social network...' %self.network.D 
 		self.network.update_network()
 
 

@@ -1,5 +1,5 @@
 # python 
-import copy
+# import copy
 
 #-----------------------------------------------------------------------------------#
 
@@ -15,7 +15,9 @@ class SocialNetwork:
 		self.friends = {}
 
 		# initialzie the Dth degree network
-		# data structure of Dth network: { id1 : set(id2, id3, ...), ...}
+		# data structure of Dth network: { id1 : { id2 : level, ...}, ...}
+		# Note that the level (degree of relationship) is stored to allow 
+		# for efficient changes to the network without recomputing it
 		self.network = {}
 
 		# initialize the degree of the network 
@@ -104,62 +106,128 @@ class SocialNetwork:
 	def update_network(self):
 		''' Updates a Dth degree network for each user '''
 
-		# if D is 1, then just use the friends network
-		if self.D == 1:
-			# use a deep copy in case self.friends is changed
-			self.network = copy.deepcopy(self.friends)
+		# D must be gte 1 
+		if self.D < 1:
+			return False
 
-		elif self.D > 1:
-			# If the distance between the users is lte 
-			# the degree then add the user to the network.
-			# NOTE: this can probably be done much better 
-			# than the O(n^2) to check the pair-wise distances between 
-			# 'n' users. This is important because computing the 
-			# distance with BFS is O(n + e), where 'n' is the
-			# number of users and 'e' is the number of edges ('friends'). 
-			for id1 in self.friends:
-				for id2 in self.friends:
+		for uid in self.friends:
+			self.compute_neighborhood(uid, self.D)
 
-					# don't need to check distances between the same user
-					if id1 == id2:
-						continue 
+		return True
 
-					# check if the users are already in each others network 
-					elif id1 in self.network:
-						if id2 in self.network[id1]:
-							continue
 
-					elif id2 in self.network:
-						if id1 in self.network[id2]:
-							continue
+	def compute_neighborhood(self, source, cutoff):
+		''' Computes all the neighbors within some cutoff distance
+			of a given source node.  '''
 
-					# compute the distance between the users 
-					path = self.shortest_path(id1, id2)
+		# the set of neighbors are stored in the self.network
+		# for a given node and the level of the relationship is 
+		# kept track of: self.network[id1] = {id2: level, ...}
 
-					if not path:
-						continue 
+		# the current level of the search
+		# starts at the level of friends         
+		level = 1
 
-					# note: the path includes the start node 
-					# so len()-1 is comparable to D
-					path = set(path)
+		# nodes to check at the next level              
+		nextlevel = self.friends[source]
 
-					if len(path)-1 <= self.D:
-						# when adding additional nodes to the path
-						# exclude the self node (i.e id1 for id1)
-						# we are only interested in the user's network
+		# make sure source is in the network 
+		if source not in self.network:
+			self.network[source] = {}
 
-						# ensure that the id is in the network
-						if id1 in self.network:
-							self.network[id1].update(path - set([id1]))
-						else:
-							# note this includes the id1 itself in the network 
-							self.network[id1] = set(path - set([id1]))
+		while nextlevel:
+			# advance to the next level
+			thislevel = nextlevel
+			nextlevel = set([])
 
-						# relationships are bi-directional
-						if id2 in self.network:
-							self.network[id2].update(path - set([id2]))
-						else:
-							self.network[id2] = set(path - set([id2])) 
+			for node in thislevel:
+				if (node != source) and (node not in self.network[source]):
+					self.network[source][node] = level
+
+					# add the friends of node to check next 
+					nextlevel.update(self.friends[node])
+
+					# relationships are bi-directional, so 
+					# include for N/2 speedup
+					if node not in self.network:
+						self.network[node] = {source: level}
+					else:
+						self.network[node][source] = level
+					
+			if cutoff <= level: 
+				break
+
+			level += 1
+
+
+	# def update_network(self):
+	# 	''' Updates a Dth degree network for each user '''
+
+	# 	# if D is 1, then just use the friends network
+	# 	if self.D == 1:
+	# 		# use a deep copy in case self.friends is changed
+	# 		self.network = copy.deepcopy(self.friends)
+
+	# 	elif self.D > 1:
+	# 		# If the distance between the users is lte 
+	# 		# the degree then add the user to the network.
+	# 		# NOTE: this can probably be done much better 
+	# 		# than the O(n^2) to check the pair-wise distances between 
+	# 		# 'n' users. This is important because computing each 
+	# 		# distance with BFS is O(n + e), where 'n' is the
+	# 		# number of users and 'e' is the number of edges ('friends'). 
+
+	# 		N = 0
+	# 		for id1 in self.friends:
+	# 			for id2 in self.friends:
+
+	# 				# don't need to check distances between the same user
+	# 				if id1 == id2:
+	# 					continue 
+
+	# 				# check if the users are already in each others network 
+	# 				elif id1 in self.network:
+	# 					if id2 in self.network[id1]:
+	# 						continue
+
+	# 				elif id2 in self.network:
+	# 					if id1 in self.network[id2]:
+	# 						continue
+
+	# 				N += 1 
+	# 				if N == 1:
+	# 					print 'Interaction #%d' %N
+	# 				elif N % 1000 == 0:
+	# 					print 'Interaction #%d' %N
+
+
+	# 				# compute the distance between the users 
+	# 				path = self.shortest_path(id1, id2)
+
+	# 				if not path:
+	# 					continue 
+
+	# 				# note: the path includes the start node 
+	# 				# so len()-1 is comparable to D
+	# 				path = set(path)
+
+	# 				if len(path)-1 <= self.D:
+	# 					# when adding additional nodes to the path
+	# 					# exclude the self node (i.e id1 for id1)
+	# 					# we are only interested in the user's network
+
+	# 					# ensure that the id is in the network
+	# 					if id1 in self.network:
+	# 						self.network[id1].update(path - set([id1]))
+	# 					else:
+	# 						# note this includes the id1 itself in the network 
+	# 						self.network[id1] = set(path - set([id1]))
+
+	# 					# relationships are bi-directional
+	# 					if id2 in self.network:
+	# 						self.network[id2].update(path - set([id2]))
+	# 					else:
+	# 						self.network[id2] = set(path - set([id2])) 
 
 
 	def bfs_paths(self, start, goal):
@@ -168,6 +236,12 @@ class SocialNetwork:
 		queue = [(start, [start])]
 		while queue:
 			(vertex, path) = queue.pop(0)
+
+			# we are only interested in paths lte D 
+			# note: path contains the vertex so Nsteps = path-1
+			if len(path)-1 > self.D:
+				yield None
+
 			for next in self.friends[vertex] - set(path):
 				if next == goal:
 					yield path + [next]
@@ -195,13 +269,14 @@ class SocialNetwork:
 	def get_user_list(self, uid):
 		''' Returns the list of users in the given user's 
 			Dth degree network '''
-		return list(self.network[uid])
+		# return list(self.network[uid])
+		return list(self.network[uid].keys())
 
 
 	def get_number_users(self):
 		return len(self.friends)
 
-		
+
 
 
 
