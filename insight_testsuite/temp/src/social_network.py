@@ -1,10 +1,11 @@
+# python 
 import copy
 
 #-----------------------------------------------------------------------------------#
 
 class SocialNetwork:
 	''' The social network stores the relationships between 
-		users in the self.network attribute. '''
+		users as well as their Dth degree networks. '''
 
 	def __init__(self, D):
 		# initialize the friends network 
@@ -99,13 +100,6 @@ class SocialNetwork:
 				return True
 		return False
 
-	def build_network(self):
-		''' Builds a Dth degree network for each user. 
-			This has the same functionality as update_network()
-			but is used to build the initial network after loading
-			the batch data. '''
-		self.update_network()
-
 
 	def update_network(self):
 		''' Updates a Dth degree network for each user '''
@@ -130,23 +124,43 @@ class SocialNetwork:
 					if id1 == id2:
 						continue 
 
+					# check if the users are already in each others network 
+					elif id1 in self.network:
+						if id2 in self.network[id1]:
+							continue
+
+					elif id2 in self.network:
+						if id1 in self.network[id2]:
+							continue
+
+					# compute the distance between the users 
 					path = self.shortest_path(id1, id2)
 
 					if not path:
 						continue 
 
-					# remove the user id1 from the path since 
-					# we are interested in the user id1's network 
+					# note: the path includes the start node 
+					# so len()-1 is comparable to D
 					path = set(path)
-					path.remove(id1)
 
-					if len(path) <= self.D:
+					if len(path)-1 <= self.D:
+						# when adding additional nodes to the path
+						# exclude the self node (i.e id1 for id1)
+						# we are only interested in the user's network
+
 						# ensure that the id is in the network
 						if id1 in self.network:
-							self.network[id1].update(path)
+							self.network[id1].update(path - set([id1]))
 						else:
 							# note this includes the id1 itself in the network 
-							self.network[id1] = set(path) 
+							self.network[id1] = set(path - set([id1]))
+
+						# relationships are bi-directional
+						if id2 in self.network:
+							self.network[id2].update(path - set([id2]))
+						else:
+							self.network[id2] = set(path - set([id2])) 
+
 
 	def bfs_paths(self, start, goal):
 		''' The Breath-First search algorithm to determine the 
@@ -168,6 +182,7 @@ class SocialNetwork:
 		except StopIteration:
 			return None	
 
+
 	def set_network_degree(self, D):
 		''' This method allows to reset the degree of the network 
 			without needing to rebuild the initial friends list '''
@@ -176,10 +191,17 @@ class SocialNetwork:
 		# update the network based on the set degree 
 		self.update_network()
 
+
 	def get_user_list(self, uid):
 		''' Returns the list of users in the given user's 
 			Dth degree network '''
 		return list(self.network[uid])
+
+
+	def get_number_users(self):
+		return len(self.friends)
+
+		
 
 
 

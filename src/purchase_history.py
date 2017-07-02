@@ -53,3 +53,7 @@ class PurchaseHistory:
 
 		# return at most T purchases
 		return purchases[:self.T]
+
+
+	def get_number_purchases(self):
+		return sum(len(lst) for lst in self.purchases.values())

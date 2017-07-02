@@ -10,6 +10,9 @@ from social_network import SocialNetwork
 #-----------------------------------------------------------------------------------#
 
 class AnomalyDetection:
+	''' This class analyzes historical batch data and then 
+		compares incoming stream data to determine if a user's 
+		purchase is anomalous within their Dth degree social network '''
 
 	def __init__(self, batch_file, stream_file, flagged_file, D=None, T=None):
 		# set the filenames as data attributes 
@@ -22,12 +25,14 @@ class AnomalyDetection:
 		self.network = {}
 		self.purchases = {}
 
+
 	def process(self):
 		''' method to load and process the data '''
 		# load the batch data
 		self.analyze_batch_data()
 
 		# analyze the stream data
+		print '\nAnalyzing stream data...'
 		self.analyze_stream_data()
 
 
@@ -37,17 +42,21 @@ class AnomalyDetection:
 		f = open(self.batch_file)
 
 		# the first line contains the degree (D) and number of 
-		# tracked purchases (T). Initialize objects 
+		# tracked purchases (T). Initialize objects. 
 		params = json.loads(f.readline().strip())
 		self.initialize_objects(params)
 	
 		# process each subsequent event in the batch data
 		f = self.process_events(f, 'batch')
 		f.close()
+		print 'Batch data loaded (%s users and %d purchases)...'\
+				% (self.network.get_number_users(),
+					self.purchases.get_number_purchases())
 
 		# once all the users are loaded to the social 
-		# network, generate the Dth degree network 
-		self.network.build_network()
+		# network, generate the Dth degree network
+		print 'Updating the Dth degree social networks...' 
+		self.network.update_network()
 
 
 	def process_events(self, f, data_type):
@@ -85,13 +94,13 @@ class AnomalyDetection:
 						self.network.remove_friend(event)
 			else:
 				break
-
 		return f
 
 
 	def initialize_objects(self, params):
 		''' Ensures that the social network and purchase 
 			history are initialized correctly '''
+
 
 		if 'D' and 'T' in params:
 			D = params['D']
@@ -128,24 +137,18 @@ class AnomalyDetection:
 			sd = np.std(np.array(purchases))
 			amount = float(amount)
 
-			# purchase is an anomaly if it's more than 3 sd's 
-			# from the mean
+			# purchase is an anomaly if it's more than 3 sd's from the mean
 			if amount > mean + (3*sd):
-				# add the mean and sd to the event 
-				# purchase['mean'] = '%.2f' %mean
-				# purchase['sd'] = '%.2f' %sd
-				# mean = '%.2f' %mean
-				# sd = '%.2f' %sd
-				# amount = '%.2f' %amount
+
+				print 'Anomalous purchase in network of %d user(s) and %d purchase(s): $%.2f' \
+						%(len(users), len(purchases), amount)
 
 				# write anomaly to the flagged purchases
 				f = open(self.flagged_file, 'a')
-				# f.write('{%s\n' % json.dumps(purchase))
-				# f.write('{"event_type":%s, "timestamp":%s, "id":%s, "amount":%.2f, "mean":%.2f, "sd":%.2f}\n' \
-				# 			%(purchase['event_type'], purchase['timestamp'], purchase['id'], amount, mean, sd))
 				f.write('{"event_type": "%s", "timestamp": "%s", "id": "%s", "amount": "%.2f", "mean": "%.2f", "sd": "%.2f"}\n' \
 							%(purchase['event_type'], purchase['timestamp'], purchase['id'], amount, mean, sd))
 				f.close()
+
 		else:
 			print 'Purchase event has incomplete data.'
 
