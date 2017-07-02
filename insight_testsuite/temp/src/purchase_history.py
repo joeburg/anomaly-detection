@@ -41,8 +41,7 @@ class PurchaseHistory:
 		# get the purchases in uid's network
 		purchases = []
 		for uid in users:
-			# purchases += self.purchases[uid]
-			# speedup only can have T purchases at most 
+			# speedup: consider T purchases at most 
 			purchases += self.purchases[uid][:self.T]
 
 		# sort the purchases by the timestamp
