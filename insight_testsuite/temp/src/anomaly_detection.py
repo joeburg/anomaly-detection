@@ -146,7 +146,7 @@ class AnomalyDetection:
 
 				# write anomaly to the flagged purchases
 				f = open(self.flagged_file, 'a')
-				f.write('{"event_type":"%s", "timestamp":"%s", "id": "%s", "amount": "%.2f", "mean": "%.2f", "sd": "%.2f"}\n' \
+				f.write('{"event_type": "%s", "timestamp": "%s", "id": "%s", "amount": "%.2f", "mean": "%.2f", "sd": "%.2f"}\n' \
 							%(purchase['event_type'], purchase['timestamp'], purchase['id'], amount, mean, sd))
 				f.close()
 
