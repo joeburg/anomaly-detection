@@ -30,8 +30,9 @@ class AnomalyDetection:
 		self.Nstream = 0
 
 		# used to track the performance of network and purchase data
-		self.network_times = []
-		self.purchase_times = []
+		self.anomaly_times = []
+		self.befriend_times = []
+		self.unfriend_times = []
 
 
 	def process(self):
@@ -52,10 +53,12 @@ class AnomalyDetection:
 		print 'Analyzed %d stream events in %.4f seconds.' \
 				%(self.Nstream, time.time()-t0)
 
-		network_time = np.mean(np.array(self.network_times))
-		purchase_time = np.mean(np.array(self.purchase_times))
-		print '\nAverage network access time = %.4f' %network_time
-		print 'Average purchase list access time = %.4f' %purchase_time
+		anomaly_time = np.mean(np.array(self.anomaly_times))
+		befriend_time = np.mean(np.array(self.befriend_times))
+		unfriend_time = np.mean(np.array(self.unfriend_times))
+		print '\nAverage anomaly check time = %.4f' %anomaly_time
+		print 'Average befriend time = %.4f' %befriend_time
+		print 'Average unfriend time = %.4f' %unfriend_time
 
 
 	def analyze_batch_data(self):
@@ -91,7 +94,9 @@ class AnomalyDetection:
 				if event['event_type'] == 'purchase':
 					if data_type == 'stream':
 						self.Nstream += 1
+						t0 = time.time()
 						self.check_for_anomaly(event)
+						self.anomaly_times.append(time.time()-t0)
 					# both stream and batch data add purchases 
 					# to the user's history 
 					self.purchases.add_purchase(event)
@@ -100,7 +105,9 @@ class AnomalyDetection:
 					if data_type == 'stream':
 						self.Nstream += 1
 						# stream data immediately updates the network
+						t0 = time.time()
 						self.network.add_friend(event, update_needed=True)
+						self.befriend_times.append(time.time()-t0)
 					else:
 						# batch data does not immediately
 						# update the network 
@@ -109,7 +116,9 @@ class AnomalyDetection:
 				elif event['event_type'] == 'unfriend':
 					if data_type == 'stream':
 						self.Nstream += 1
+						t0 = time.time()
 						self.network.remove_friend(event, update_needed=True)
+						self.unfriend_times.append(time.time()-t0)
 					else:
 						# batch data 
 						self.network.remove_friend(event)
@@ -151,14 +160,8 @@ class AnomalyDetection:
 
 		if uid and amount:
 			# get the last T purchases in the uid's network
-			t0 = time.time()
 			users = self.network.get_user_list(uid)
-			t1 = time.time()
 			purchases = self.purchases.get_purchase_list(users)
-			t2 = time.time()
-			self.network_times.append(t1-t0)
-			self.purchase_times.append(t2-t1)
-
 
 			if len(purchases):
 				mean = np.mean(np.array(purchases))
