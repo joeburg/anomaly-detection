@@ -54,11 +54,14 @@ class AnomalyDetection:
 				%(self.Nstream, time.time()-t0)
 
 		anomaly_time = np.mean(np.array(self.anomaly_times))
+		anomaly_sd = np.std(np.array(self.anomaly_times))
 		befriend_time = np.mean(np.array(self.befriend_times))
+		befriend_sd = np.std(np.array(self.befriend_times))
 		unfriend_time = np.mean(np.array(self.unfriend_times))
-		print '\nAverage anomaly check time = %.4f' %anomaly_time
-		print 'Average befriend time = %.4f' %befriend_time
-		print 'Average unfriend time = %.4f' %unfriend_time
+		unfriend_sd = np.std(np.array(self.unfriend_times))
+		print '\nAverage (from %d) anomaly check time = %.6f +/- %.6f' %(len(self.anomaly_times), anomaly_time, anomaly_sd)
+		print 'Average (from %d) befriend time = %.6f +/- %.6f' %(len(self.befriend_times), befriend_time, befriend_sd)
+		print 'Average (from %d) unfriend time = %.6f +/- %.6f' %(len(self.unfriend_times), unfriend_time, unfriend_sd)
 
 
 	def analyze_batch_data(self):
