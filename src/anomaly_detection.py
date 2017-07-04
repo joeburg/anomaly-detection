@@ -175,18 +175,21 @@ class AnomalyDetection:
 		if uid and amount:
 			# get the last T purchases in the uid's network
 			users = self.network.get_user_list(uid)
-			purchases = self.purchases.get_purchase_list(users)
+			# purchases = self.purchases.get_purchase_list(users)
+			mean, sd, T = self.purchases.get_purchase_list(users)
 
-			if len(purchases):
-				mean = np.mean(np.array(purchases))
-				sd = np.std(np.array(purchases))
+			# if len(purchases):
+			if mean and sd:
+				# mean = np.mean(np.array(purchases))
+				# sd = np.std(np.array(purchases))
+				
 				amount = float(amount)
 
 				# purchase is an anomaly if it's more than 3 sd's from the mean
 				if amount > mean + (3*sd):
 
 					print 'Anomalous purchase in network of %d user(s) and %d purchase(s): $%.2f' \
-							%(len(users), len(purchases), amount)
+							%(len(users), T, amount)
 
 					# write anomaly to the flagged purchases
 					f = open(self.flagged_file, 'a')

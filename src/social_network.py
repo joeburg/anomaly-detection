@@ -68,12 +68,16 @@ class SocialNetwork:
 				# get the list of users for id1 and id2 that
 				# are within D-1 of the them. The Dth users 
 				# will not be affected by the new relationship
-				users1 = self.get_user_list(id1, self.D-1)
-				users2 = self.get_user_list(id2, self.D-1)
+				# users1 = self.get_user_list(id1, self.D-1)
+				# users2 = self.get_user_list(id2, self.D-1)
+				users = self.get_user_list(id1, self.D-1)
+				users.update(self.get_user_list(id2, self.D-1))
+				users.update([id1,id2])
 				# update the networks of each user in
 				# id1 and id2's networks
 				# use a set to eliminate repeats
-				users = set(users1 + users2 + [id1, id2])
+				# users = users1.update(users2).update([id1, id2])
+				# users = set(users1 + users2 + [id1, id2])
 				self.update_network(users)
 				self.update_network_times.append(time.time()-t0)
 		else:
@@ -114,12 +118,15 @@ class SocialNetwork:
 				# get the list of users for id1 and id2 that
 				# are within D-1 of the them. The Dth users 
 				# will not be affected by the removed relationship
-				users1 = self.get_user_list(id1, self.D-1)
-				users2 = self.get_user_list(id2, self.D-1)
+				# users1 = self.get_user_list(id1, self.D-1)
+				# users2 = self.get_user_list(id2, self.D-1)
+				users = self.get_user_list(id1, self.D-1)
+				users.update(self.get_user_list(id2, self.D-1))
+				users.update([id1,id2])
 				# update the networks of each user in
 				# id1 and id2's networks
 				# use a set to eliminate repeats
-				users = set(users1 + users2 + [id1, id2])
+				# users = set(users1 + users2 + [id1, id2])
 				self.update_network(users)
 		else:
 			print 'Unfriend event has incomplete data.'
@@ -214,10 +221,12 @@ class SocialNetwork:
 		if uid in self.network:
 			if cutoff:
 				# only return users with a degree <= cutoff
-				return list(id2 for id2 in self.network[uid] if self.network[uid][id2] <= cutoff)
+				# return list(id2 for id2 in self.network[uid] if self.network[uid][id2] <= cutoff)
+				return set(id2 for id2 in self.network[uid] if self.network[uid][id2] <= cutoff)
 			# otherwise, return all users in the network
-			return list(self.network[uid].keys())
-		return []
+			# return list(self.network[uid].keys())
+			return set(self.network[uid].keys())
+		return set([])
 
 
 	def get_number_users(self):
