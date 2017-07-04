@@ -95,3 +95,4 @@ function run_all_tests {
 
 check_project_struct
 run_all_tests
+python -m unittest ./unit_tests/unit_tests

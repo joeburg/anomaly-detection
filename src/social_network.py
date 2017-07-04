@@ -1,6 +1,6 @@
 # python 
-import time
 
+#-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
 
 class SocialNetwork:
@@ -23,12 +23,7 @@ class SocialNetwork:
 		# initialize the degree of the network 
 		self.D = int(D)
 
-		self.add_friend_times = []
-		self.update_friend_times = []
-		self.update_network_times = []
 
-
-	# def add_friend(self, id1, id2, update_needed=False):
 	def add_friend(self, befriend, update_needed=False):
 		''' adds a relationship between 2 users in the network '''
 
@@ -39,47 +34,32 @@ class SocialNetwork:
 		if id1 and id2:		
 			if id1 in self.friends:
 				# add id2 to the set() of friends for id1
-				t0 = time.time()
 				self.friends[id1].add(id2)
-				self.add_friend_times.append(time.time()-t0)
 			else:
 				# if the user is not in the network, create the user
 				# and then add the relationship
-				t0 = time.time()
 				self.friends[id1] = set([id2])
-				self.update_friend_times.append(time.time()-t0)
 
 			# relationships are bi-directional so add the
 			# relationship for id2 as well
 			if id2 in self.friends:
-				t0 = time.time()
 				self.friends[id2].add(id1)
-				self.add_friend_times.append(time.time()-t0)
 			else:
 				self.friends[id2] = set([id1])
-				self.update_friend_times.append(time.time()-t0)
 
 			# used to distinguish between add_friend() for batch data
 			# versus stream data; network dosnt need to be updated until 
 			# all batch data is added, whereas the network has to be 
 			# updated in real-time with stream data
 			if update_needed:
-				t0 = time.time()
 				# get the list of users for id1 and id2 that
 				# are within D-1 of the them. The Dth users 
-				# will not be affected by the new relationship
-				# users1 = self.get_user_list(id1, self.D-1)
-				# users2 = self.get_user_list(id2, self.D-1)
+				# will not be affected by the new relationship;
+				# use a set to eliminate repeats
 				users = self.get_user_list(id1, self.D-1)
 				users.update(self.get_user_list(id2, self.D-1))
 				users.update([id1,id2])
-				# update the networks of each user in
-				# id1 and id2's networks
-				# use a set to eliminate repeats
-				# users = users1.update(users2).update([id1, id2])
-				# users = set(users1 + users2 + [id1, id2])
 				self.update_network(users)
-				self.update_network_times.append(time.time()-t0)
 		else:
 			print 'Befriend event has incomplete data.'
 
@@ -118,15 +98,9 @@ class SocialNetwork:
 				# get the list of users for id1 and id2 that
 				# are within D-1 of the them. The Dth users 
 				# will not be affected by the removed relationship
-				# users1 = self.get_user_list(id1, self.D-1)
-				# users2 = self.get_user_list(id2, self.D-1)
 				users = self.get_user_list(id1, self.D-1)
 				users.update(self.get_user_list(id2, self.D-1))
 				users.update([id1,id2])
-				# update the networks of each user in
-				# id1 and id2's networks
-				# use a set to eliminate repeats
-				# users = set(users1 + users2 + [id1, id2])
 				self.update_network(users)
 		else:
 			print 'Unfriend event has incomplete data.'
@@ -205,14 +179,6 @@ class SocialNetwork:
 
 			level += 1
 
-	def set_network_degree(self, D):
-		''' This method allows to reset the degree of the network 
-			without needing to rebuild the initial friends list '''
-		self.D = D
-
-		# update the network based on the set degree 
-		self.update_network()
-
 
 	def get_user_list(self, uid, cutoff=None):
 		''' Returns the list of users in the given user's 
@@ -221,16 +187,23 @@ class SocialNetwork:
 		if uid in self.network:
 			if cutoff:
 				# only return users with a degree <= cutoff
-				# return list(id2 for id2 in self.network[uid] if self.network[uid][id2] <= cutoff)
 				return set(id2 for id2 in self.network[uid] if self.network[uid][id2] <= cutoff)
 			# otherwise, return all users in the network
-			# return list(self.network[uid].keys())
 			return set(self.network[uid].keys())
 		return set([])
 
 
 	def get_number_users(self):
+		''' Returns the number of users in the network '''
 		return len(self.friends)
+
+
+	def set_network_degree(self, D):
+		''' Allows to set the degree of the network and 
+			updates the Dth degree network '''
+		self.D = D 
+		self.update_network()
+
 
 
 
