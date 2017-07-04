@@ -25,6 +25,7 @@ class SocialNetwork:
 
 		self.add_friend_times = []
 		self.update_friend_times = []
+		self.update_network_times = []
 
 
 	# def add_friend(self, id1, id2, update_needed=False):
@@ -63,6 +64,7 @@ class SocialNetwork:
 			# all batch data is added, whereas the network has to be 
 			# updated in real-time with stream data
 			if update_needed:
+				t0 = time.time()
 				# get the list of users for id1 and id2 that
 				# are within D-1 of the them. The Dth users 
 				# will not be affected by the new relationship
@@ -72,7 +74,8 @@ class SocialNetwork:
 				# id1 and id2's networks
 				# use a set to eliminate repeats
 				users = set(users1 + users2 + [id1, id2])
-				self.update_network()
+				self.update_network(users)
+				self.update_network_times.append(time.time()-t0)
 		else:
 			print 'Befriend event has incomplete data.'
 

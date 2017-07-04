@@ -53,23 +53,26 @@ class AnomalyDetection:
 		print 'Analyzed %d stream events in %.4f seconds.' \
 				%(self.Nstream, time.time()-t0)
 
-		# anomaly_time = np.mean(np.array(self.anomaly_times))
-		# anomaly_sd = np.std(np.array(self.anomaly_times))
-		# befriend_time = np.mean(np.array(self.befriend_times))
-		# befriend_sd = np.std(np.array(self.befriend_times))
-		# unfriend_time = np.mean(np.array(self.unfriend_times))
-		# unfriend_sd = np.std(np.array(self.unfriend_times))
-		# print '\nAverage (from %d) anomaly check time = %.6f +/- %.6f' %(len(self.anomaly_times), anomaly_time, anomaly_sd)
-		# print 'Average (from %d) befriend time = %.6f +/- %.6f' %(len(self.befriend_times), befriend_time, befriend_sd)
-		# print 'Average (from %d) unfriend time = %.6f +/- %.6f' %(len(self.unfriend_times), unfriend_time, unfriend_sd)
+		anomaly_time = np.mean(np.array(self.anomaly_times))
+		anomaly_sd = np.std(np.array(self.anomaly_times))
+		befriend_time = np.mean(np.array(self.befriend_times))
+		befriend_sd = np.std(np.array(self.befriend_times))
+		unfriend_time = np.mean(np.array(self.unfriend_times))
+		unfriend_sd = np.std(np.array(self.unfriend_times))
+		print '\nAverage (from %d) anomaly check time = %.6f +/- %.6f' %(len(self.anomaly_times), anomaly_time, anomaly_sd)
+		print 'Average (from %d) befriend time = %.6f +/- %.6f' %(len(self.befriend_times), befriend_time, befriend_sd)
+		print 'Average (from %d) unfriend time = %.6f +/- %.6f' %(len(self.unfriend_times), unfriend_time, unfriend_sd)
 
 		add_friend_time = np.mean(np.array(self.network.add_friend_times))
 		add_friend_sd = np.std(np.array(self.network.add_friend_times))
 		update_friend_time = np.mean(np.array(self.network.update_friend_times))
 		update_friend_sd = np.mean(np.array(self.network.update_friend_times))
+		update_network_time = np.mean(np.array(self.network.update_network_times))
+		update_network_sd = np.mean(np.array(self.network.update_network_times))
 
 		print '\nAverage (from %d) add friend time = %.8f +/- %.8f' %(len(self.network.add_friend_times), add_friend_time, add_friend_sd)
-		print 'Average (from %d) update friend time = %.8f +/- %.8f' %(len(self.network.update_friend_times), update_friend_time, update_friend_sd)		
+		print 'Average (from %d) update friend time = %.8f +/- %.8f' %(len(self.network.update_friend_times), update_friend_time, update_friend_sd)
+		print 'Average (from %d) update network time = %.8f +/- %.8f' %(len(self.network.update_network_times), update_network_time, update_network_sd)		
 
 
 	def analyze_batch_data(self):
@@ -105,9 +108,9 @@ class AnomalyDetection:
 				if event['event_type'] == 'purchase':
 					if data_type == 'stream':
 						self.Nstream += 1
-						# t0 = time.time()
+						t0 = time.time()
 						self.check_for_anomaly(event)
-						# self.anomaly_times.append(time.time()-t0)
+						self.anomaly_times.append(time.time()-t0)
 					# both stream and batch data add purchases 
 					# to the user's history 
 					self.purchases.add_purchase(event)
@@ -116,9 +119,9 @@ class AnomalyDetection:
 					if data_type == 'stream':
 						self.Nstream += 1
 						# stream data immediately updates the network
-						# t0 = time.time()
+						t0 = time.time()
 						self.network.add_friend(event, update_needed=True)
-						# self.befriend_times.append(time.time()-t0)
+						self.befriend_times.append(time.time()-t0)
 					else:
 						# batch data does not immediately
 						# update the network 
@@ -127,9 +130,9 @@ class AnomalyDetection:
 				elif event['event_type'] == 'unfriend':
 					if data_type == 'stream':
 						self.Nstream += 1
-						# t0 = time.time()
+						t0 = time.time()
 						self.network.remove_friend(event, update_needed=True)
-						# self.unfriend_times.append(time.time()-t0)
+						self.unfriend_times.append(time.time()-t0)
 					else:
 						# batch data 
 						self.network.remove_friend(event)
