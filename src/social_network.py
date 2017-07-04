@@ -1,5 +1,5 @@
 # python 
-# import copy
+import time
 
 #-----------------------------------------------------------------------------------#
 
@@ -23,6 +23,9 @@ class SocialNetwork:
 		# initialize the degree of the network 
 		self.D = int(D)
 
+		self.add_friend_times = []
+		self.update_friend_times = []
+
 
 	# def add_friend(self, id1, id2, update_needed=False):
 	def add_friend(self, befriend, update_needed=False):
@@ -35,18 +38,25 @@ class SocialNetwork:
 		if id1 and id2:		
 			if id1 in self.friends:
 				# add id2 to the set() of friends for id1
+				t0 = time.time()
 				self.friends[id1].add(id2)
+				self.add_friend_times.append(time.time()-t0)
 			else:
 				# if the user is not in the network, create the user
 				# and then add the relationship
+				t0 = time.time()
 				self.friends[id1] = set([id2])
+				self.update_friend_times.append(time.time()-t0)
 
 			# relationships are bi-directional so add the
 			# relationship for id2 as well
 			if id2 in self.friends:
+				t0 = time.time()
 				self.friends[id2].add(id1)
+				self.add_friend_times.append(time.time()-t0)
 			else:
 				self.friends[id2] = set([id1])
+				self.update_friend_times.append(time.time()-t0)
 
 			# used to distinguish between add_friend() for batch data
 			# versus stream data; network dosnt need to be updated until 
@@ -100,7 +110,7 @@ class SocialNetwork:
 			if friend_removed and update_needed:
 				# get the list of users for id1 and id2 that
 				# are within D-1 of the them. The Dth users 
-				# will not be affected by the new relationship
+				# will not be affected by the removed relationship
 				users1 = self.get_user_list(id1, self.D-1)
 				users2 = self.get_user_list(id2, self.D-1)
 				# update the networks of each user in
@@ -132,7 +142,6 @@ class SocialNetwork:
 
 		# if specific users given, only update their network
 		if len(specific_users):
-			print 'updating specific users: %d' %len(specific_users)
 			for uid in specific_users:
 				self.compute_neighborhood(uid, self.D)
 		else:
