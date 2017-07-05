@@ -11,7 +11,7 @@ This program detects anomalous purchases within a social network, where an anoma
 
 # Required Libraries
 
-This program was written in python and requried the following standard python libraries:
+This program was written in python and requires the following standard python libraries:
 * json
 * numpy
 * sys
@@ -20,11 +20,12 @@ This program was written in python and requried the following standard python li
 
 # Capacity
 
-This program can process ~100 events/second on a mac. So it should be able to handle rather large traffic volumes. 
+This program can process ~100 events/second locally on a mac. So it should be able to handle rather large traffic volumes. 
 
 # Testing 
 
 To run the python unit test, use the following command in the top directory:
+
 $ python -m src.tests.tests
 
 The unit tests are placed within the src/ directory to follow good python practices, where tests are placed within the same module.
