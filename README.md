@@ -20,7 +20,7 @@ This program was written in python and requires the following standard python li
 
 # Capacity
 
-This program can process ~100 events/second locally on a mac. So it should be able to handle rather large traffic volumes. 
+This program can process ~100 events/second for a large (500,000 event) dataset locally on a mac. So it should be able to handle rather large traffic volumes. 
 
 # Testing 
 
