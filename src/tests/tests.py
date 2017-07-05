@@ -1,14 +1,8 @@
 # python
-import sys
 import unittest
 
-# # import the source code 
-# sys.path.insert(0, '/../src/')
-
 # project 
-from anomaly_detection import AnomalyDetection
-from purchase_history import PurchaseHistory
-from social_network import SocialNetwork
+from ..anomaly_detection import AnomalyDetection
 
 #-----------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------#
@@ -18,19 +12,19 @@ class TestCases(unittest.TestCase):
 		purchase history, and anomaly detection '''
 
 	def setUp(self):
-		''' Initialize batch and stream data
-			as well as the social network and 
-			purchase history '''
+		''' Initialize batch and stream data as well as the social network 
+			and purchase history '''
+		batch_file = 'src/tests/log_input/batch_log.json'
+		stream_file = 'src/tests/log_input/stream_log.json'
+		flagged_file = 'src/tests/log_output/flagged_purchases.json'
 
-		# load a new session by building a social network 
-		# and purchase history from a batch log file 
-		batch_file = 'unit_test_data/batch_log.json'
-		self.session = AnomalyDetection(batch_file, '', '')
+		self.session = AnomalyDetection(batch_file, stream_file, flagged_file) 
 		self.session.analyze_batch_data()
 
 
 	def test_batch_data_loaded(self):
 		''' Assert that the batch data loaded properly '''
+		# ensure the data loaded propertly
 		self.assertEqual(self.session.network.D, 3)
 		self.assertEqual(self.session.purchases.T, 5)
 		self.assertEqual(self.session.network.get_number_users(), 5)
@@ -61,7 +55,7 @@ class TestCases(unittest.TestCase):
 	def test_add_friend(self):
 		''' Assert that a friend is properly added to the network '''
 		event = {'id1': '5', 'id2': '6'}
-		self.network.add_friend(event, update_needed=True)
+		self.session.network.add_friend(event, update_needed=True)
 
 		# id 5 and 6 should be friends 
 		self.assertIn('6', self.session.network.friends['5'])
@@ -72,20 +66,20 @@ class TestCases(unittest.TestCase):
 
 	def test_remove_friend(self):
 		''' Assert that a friendship is properly removed from the network '''
-		event = {'id1': '5', 'id2': '6'}
-		self.network.remove_friend(event, update_needed=True)
+		event = {'id1': '4', 'id2': '5'}
+		self.session.network.remove_friend(event, update_needed=True)
 
-		# id 5 and 6 should not be friends 
-		self.assertNotIn('6', self.session.network.friends['5'])
+		# id 4 and 5 should not be friends 
+		self.assertNotIn('5', self.session.network.friends['4'])
 
-		# id 3 should not be in id 6's 3rd degree network
-		self.assertNotIn('3', self.session.network.network['6'])
+		# id 2 should not be in id 5's 3rd degree network
+		self.assertNotIn('2', self.session.network.network['5'])
 
 
 	def test_add_purchase(self):
 		''' Assert that a purchase was properly added to the network '''
 		event = {'timestamp': '2017-06-13 11:33:12', 'id': '1', 'amount': '13.24'}
-		self.purchases.add_purchase(event)
+		self.session.purchases.add_purchase(event)
 
 		# there should be 8 purchases now
 		self.assertEqual(8, self.session.purchases.get_number_purchases())
@@ -135,7 +129,7 @@ class TestCases(unittest.TestCase):
 		# in the network, so the purchase stats should return (0,0,0)
 		self.session.network.set_network_degree(1)
 		users = self.session.network.get_user_list('1')
-		self.assertTupleEqual((0,0,0), self.session.purchases.get_purchase_stats[users])
+		self.assertTupleEqual((0,0,0), self.session.purchases.get_purchase_stats(users))
 
 		# set the network degree to D=2, uid '1' will have 4 purchases 
 		# in the network, so the purchase stats should return the stats for all 4
@@ -164,26 +158,13 @@ class TestCases(unittest.TestCase):
 		# network list that will be analyzed 
 		self.assertNotIn('1', self.session.network.get_user_list('1'))
 
+
 	def test_anomaly_detection(self):
 		''' Assert that an anomlous purchase is detected '''
-
-		purchase = {'timestamp': '2017-06-13 11:33:13', 'id': '2', 'amount': 2000}
+		purchase = {'event_type': 'purchase', 'timestamp': '2017-06-13 11:33:13', 'id': '2', 'amount': 2000}
 		is_anomalous = self.session.check_for_anomaly(purchase)
 		self.assertTrue(is_anomalous)
-
-# def test_suite():
-#     suite = unittest.TestSuite()
-
-#     suite.addTest(unittest.makeSuite(AttributeTestCase))
-#     suite.addTest(unittest.makeSuite(LevelTestCase))
-#     suite.addTest(unittest.makeSuite(HierarchyTestCase))
-#     suite.addTest(unittest.makeSuite(DimensionTestCase))
-#     suite.addTest(unittest.makeSuite(CubeTestCase))
-#     suite.addTest(unittest.makeSuite(ModelTestCase))
-
-#     suite.addTest(unittest.makeSuite(OldModelValidatorTestCase))
-
-#     return suite
+		
 
 if __name__ == '__main__':
 	unittest.main()

@@ -75,6 +75,10 @@ class PurchaseHistory:
 				purchases.append(amount)
 				n += 1
 
+		# ensure that the number of purchases are >2 and <T
+		if not len(purchases)>2 and len(purchases)<=self.T:
+			return (0,0,0)
+
 		mean = np.mean(np.array(purchases))
 		sd = np.std(np.array(purchases))
 

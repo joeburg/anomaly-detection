@@ -151,11 +151,10 @@ class SocialNetwork:
 		# nodes to check at the next level              
 		nextlevel = self.friends[source]
 
-		# make sure source is in the network 
-		if source not in self.network:
-			self.network[source] = {}
+		# re-initialize the network for the source node
+		self.network[source] = {}
 
-		while nextlevel:
+		while True:
 			# advance to the next level
 			thislevel = nextlevel
 			nextlevel = set([])
@@ -164,15 +163,15 @@ class SocialNetwork:
 				if (node != source) and (node not in self.network[source]):
 					self.network[source][node] = level
 
-					# add the friends of node to check next 
-					nextlevel.update(self.friends[node])
-
 					# relationships are bi-directional, so 
 					# include for N/2 speedup
 					if node not in self.network:
 						self.network[node] = {source: level}
 					else:
 						self.network[node][source] = level
+
+				# add the friends of node to check next 
+				nextlevel.update(self.friends[node])
 					
 			if cutoff <= level: 
 				break
@@ -202,6 +201,7 @@ class SocialNetwork:
 		''' Allows to set the degree of the network and 
 			updates the Dth degree network '''
 		self.D = D 
+		self.network = {}
 		self.update_network()
 
 
